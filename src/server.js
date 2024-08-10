@@ -1,18 +1,23 @@
-import express from 'express';
-import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import express from 'express';
+import morgan from 'morgan';
 
 import sequelize from './config/database.js';
 
 import projectsRouter from './routes/projects.js';
 import tasksRouter from './routes/tasks.js';
+import authRouter from './routes/auth.js';
 
 dotenv.config();
 
 const app = express();
-const supabase = createClient(process.env.SUPABASE_DB_URL, process.env.SUPABASE_DB_KEY);
 
+// Middleware
+app.use(morgan('dev'))
 app.use(express.json());
+
+// Rutas
+app.use('/auth', authRouter); 
 app.use('/projects', projectsRouter);
 app.use('/tasks', tasksRouter);
 
