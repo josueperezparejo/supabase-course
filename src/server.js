@@ -8,22 +8,44 @@ import projectsRouter from './routes/projects.js';
 import tasksRouter from './routes/tasks.js';
 import authRouter from './routes/auth.js';
 
+import errorHandler from './middlewares/errorHandler.js';
+
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
+import { resolvers, typeDefs } from './graphql/index.js';
+
 dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(morgan('dev'))
-app.use(express.json());
+const server = new ApolloServer({
+    typeDefs: typeDefs,
+    resolvers: resolvers,
+})
 
-// Rutas
-app.use('/auth', authRouter); 
-app.use('/projects', projectsRouter);
-app.use('/tasks', tasksRouter);
+async function setupServer() {
+    try {
+        await server.start()
 
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke!');
-});
+        // Middleware
+        app.use(morgan('dev'))
+        app.use(express.json());
+
+        // Rutas
+        app.use('/auth', authRouter);
+        app.use('/projects', projectsRouter);
+        app.use('/tasks', tasksRouter);
+
+        // ApolloServer
+        app.use('/graphql', express.json(), expressMiddleware(server));
+
+        // errorHandler
+        app.use(errorHandler);
+    } catch (error) {
+        console.error('Error starting server:', error);
+    }
+}
+
+setupServer()
 
 export { app, sequelize };

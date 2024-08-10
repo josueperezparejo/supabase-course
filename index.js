@@ -10,6 +10,7 @@ async function startServer() {
 
         app.listen(PORT, () => {
             console.log(`Server is running on port http://localhost:${PORT}`);
+            console.log(`GraphQL server is running on http://localhost:${PORT}/graphql`);
         });
     } catch (error) {
         console.error('Error starting server:', error);
